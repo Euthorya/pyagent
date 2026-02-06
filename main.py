@@ -2,6 +2,8 @@ import os
 import argparse
 from dotenv import load_dotenv
 from google import genai
+from google.genai import types
+
 
 
 def main():
@@ -12,16 +14,21 @@ def main():
         raise RuntimeError("The api key was not set")
     client = genai.Client(api_key=api_key)
     args = get_args()
-    response = client.models.generate_content(model='gemini-2.5-flash', contents=args.user_prompt)
+    messages = [types.Content(role="user", parts=[types.Part(text=args.user_prompt)])]
+    
+    response = client.models.generate_content(model='gemini-2.5-flash', contents=messages)
     if not response.usage_metadata:
         raise RuntimeError(f"Empty response from Google API: {response}")
-    print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
-    print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
+    if args.verbose:
+        print(f"User prompt: {args.user_prompt}")
+        print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
+        print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
     print(response.text)
 
 def get_args():
     parser = argparse.ArgumentParser(description="Chatbot")
     parser.add_argument("user_prompt", type=str, help="User prompt")
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     return parser.parse_args()
 
 
