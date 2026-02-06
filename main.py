@@ -1,6 +1,8 @@
 import os
+import argparse
 from dotenv import load_dotenv
 from google import genai
+
 
 def main():
     print("Hello from pyagent!")
@@ -9,15 +11,20 @@ def main():
     if not api_key:
         raise RuntimeError("The api key was not set")
     client = genai.Client(api_key=api_key)
-    response = client.models.generate_content(model='gemini-2.5-flash', contents="Why is Boot.dev such a great place to learn backend development? Use one paragraph maximum.")
+    args = get_args()
+    response = client.models.generate_content(model='gemini-2.5-flash', contents=args.user_prompt)
     if not response.usage_metadata:
         raise RuntimeError(f"Empty response from Google API: {response}")
     print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
     print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
-    
-
-
     print(response.text)
+
+def get_args():
+    parser = argparse.ArgumentParser(description="Chatbot")
+    parser.add_argument("user_prompt", type=str, help="User prompt")
+    return parser.parse_args()
+
+
 
 
 if __name__ == "__main__":
