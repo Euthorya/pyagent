@@ -1,4 +1,5 @@
 import os
+from google.genai import types
 
 MAX_SIZE = 10000
 
@@ -18,5 +19,19 @@ def get_file_content(working_directory, file_path):
         return content
     except Exception as e:
         return f"Error: {e}"
+
+schema_get_file_content = types.FunctionDeclaration(
+    name="get_file_content",
+    description=f"Opens a file located in file_path under working directory and returns its contents, truncated to {MAX_SIZE} symbols",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="File path, relative to the working directory",
+            ),
+        },
+    ),
+)
 
 
